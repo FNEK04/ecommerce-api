@@ -10,6 +10,10 @@ class Order extends Model
 {
     use HasFactory;
 
+    public const STATUS_PENDING_PAYMENT = 'pending_payment';
+    public const STATUS_PAID = 'paid';
+    public const STATUS_CANCELLED = 'cancelled';
+
     protected $fillable = [
         'user_id',
         'payment_method_id',
@@ -44,7 +48,7 @@ class Order extends Model
 
     public function scopePendingPayment($query)
     {
-        return $query->where('status', 'pending_payment');
+        return $query->where('status', self::STATUS_PENDING_PAYMENT);
     }
 
     public function scopeExpired($query)
@@ -55,14 +59,14 @@ class Order extends Model
     public function markAsPaid()
     {
         $this->update([
-            'status' => 'paid',
+            'status' => self::STATUS_PAID,
             'paid_at' => now(),
         ]);
     }
 
     public function markAsCancelled()
     {
-        $this->update(['status' => 'cancelled']);
+        $this->update(['status' => self::STATUS_CANCELLED]);
     }
 
     public static function generateOrderNumber()

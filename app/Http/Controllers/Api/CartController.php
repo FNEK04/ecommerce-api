@@ -16,7 +16,7 @@ class CartController extends Controller
         $cart = auth()->user()->getOrCreateCart();
         $cart->load(['items.product']);
 
-        return new CartResource($cart);
+        return (new CartResource($cart))->response()->setStatusCode(200);
     }
 
     public function add(AddToCartRequest $request): JsonResponse
@@ -66,15 +66,21 @@ class CartController extends Controller
         ]);
 
         $cart = auth()->user()->cart;
-        
+
         if (!$cart) {
-            return response()->json(['message' => 'Cart is empty'], 404);
+            return response()->json([
+                'message' => 'Product removed from cart',
+                'cart' => null,
+            ], 200);
         }
 
         $cartItem = $cart->items()->where('product_id', $request->product_id)->first();
 
         if (!$cartItem) {
-            return response()->json(['message' => 'Product not found in cart'], 404);
+            return response()->json([
+                'message' => 'Product removed from cart',
+                'cart' => new CartResource($cart),
+            ], 200);
         }
 
         $cartItem->delete();

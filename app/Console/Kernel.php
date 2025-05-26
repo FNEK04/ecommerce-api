@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\OrdersCancelExpired;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -18,6 +19,8 @@ class Kernel extends ConsoleKernel
             ->everyTwoMinutes()
             ->withoutOverlapping()
             ->runInBackground();
+
+        $schedule->command(OrdersCancelExpired::class)->everyMinute();
     }
 
     protected function commands(): void
