@@ -39,6 +39,6 @@ class User extends Authenticatable
 
     public function getOrCreateCart()
     {
-        return $this->cart ?: $this->cart()->create();
+        return $this->cart()->firstOrCreate(['user_id' => $this->id]);
     }
 }

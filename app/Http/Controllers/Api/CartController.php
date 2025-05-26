@@ -83,7 +83,10 @@ class CartController extends Controller
             ], 200);
         }
 
-        $cartItem->delete();
+        \Log::info('cartItem before delete', ['cartItem' => $cartItem]);
+        $deleted = $cartItem->delete();
+        \Log::info('cartItem delete result', ['deleted' => $deleted]);
+        \Log::info('cart_items after delete', ['cart_items' => \DB::table('cart_items')->get()]);
 
         $cart->load(['items.product']);
 

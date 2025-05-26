@@ -7,22 +7,27 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use Illuminate\Support\Facades\DB;
 
 class CartTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected $user;
+
     protected function setUp(): void
     {
         parent::setUp();
-        Sanctum::actingAs(User::factory()->create());
+        \DB::statement('PRAGMA foreign_keys=ON');
+        $this->user = User::factory()->create();
+        Sanctum::actingAs($this->user);
     }
 
     public function test_can_add_product_to_cart()
     {
         $product = Product::factory()->create(['stock' => 10]);
 
-        $response = $this->postJson('/api/cart/add', [
+        $response = $this->actingAs($this->user)->postJson('/api/cart/add', [
             'product_id' => $product->id,
             'quantity' => 2,
         ]);
@@ -40,7 +45,7 @@ class CartTest extends TestCase
     {
         $product = Product::factory()->create(['stock' => 5]);
 
-        $response = $this->postJson('/api/cart/add', [
+        $response = $this->actingAs($this->user)->postJson('/api/cart/add', [
             'product_id' => $product->id,
             'quantity' => 10,
         ]);
@@ -54,13 +59,13 @@ class CartTest extends TestCase
         $product = Product::factory()->create();
         
         // Добавляем товар в корзину
-        $this->postJson('/api/cart/add', [
+        $this->actingAs($this->user)->postJson('/api/cart/add', [
             'product_id' => $product->id,
             'quantity' => 1,
         ]);
 
         // Удаляем товар из корзины
-        $response = $this->deleteJson('/api/cart/remove', [
+        $response = $this->actingAs($this->user)->deleteJson('/api/cart/remove', [
             'product_id' => $product->id,
         ]);
 
@@ -76,12 +81,12 @@ class CartTest extends TestCase
     {
         $product = Product::factory()->create();
         
-        $this->postJson('/api/cart/add', [
+        $this->actingAs($this->user)->postJson('/api/cart/add', [
             'product_id' => $product->id,
             'quantity' => 2,
         ]);
 
-        $response = $this->getJson('/api/cart');
+        $response = $this->actingAs($this->user)->getJson('/api/cart');
 
         $response->assertStatus(200)
             ->assertJsonStructure([

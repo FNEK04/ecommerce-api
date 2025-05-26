@@ -14,10 +14,13 @@ class OrderTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected $user;
+
     protected function setUp(): void
     {
         parent::setUp();
-        Sanctum::actingAs(User::factory()->create());
+        $this->user = User::factory()->create();
+        Sanctum::actingAs($this->user);
     }
 
     public function test_can_checkout_cart()
@@ -25,14 +28,12 @@ class OrderTest extends TestCase
         $product = Product::factory()->create(['stock' => 10]);
         $paymentMethod = PaymentMethod::factory()->create();
 
-        // Добавляем товар в корзину
-        $this->postJson('/api/cart/add', [
+        $this->actingAs($this->user)->postJson('/api/cart/add', [
             'product_id' => $product->id,
             'quantity' => 2,
         ]);
 
-        // Оформляем заказ
-        $response = $this->postJson('/api/checkout', [
+        $response = $this->actingAs($this->user)->postJson('/api/checkout', [
             'payment_method_id' => $paymentMethod->id,
         ]);
 
